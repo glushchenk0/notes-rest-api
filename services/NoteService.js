@@ -1,19 +1,20 @@
 import express from 'express';
-import fs from 'fs';
+import Repo from '../repositories/Repo.js';
+// import fs from 'fs';
 
 const jsonParser = express.json();
-const filePath = './repositories/notes.json';
+// const filePath = './repositories/notes.json';
 
 class NoteService {
     getAll() {
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = Repo.read();
         const notes = JSON.parse(content);
         return notes;
     }
 
     getOne(id) {
         let note = null;
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = Repo.read();
         const notes = JSON.parse(content);
         for (var i = 0; i < notes.length; i++) {
             if (notes[i].id == id) {
@@ -36,7 +37,7 @@ class NoteService {
         const noteContent = note.content;
         const noteDateslist = note.dateslist;
         const noteArchive = note.archived;
-        let data = fs.readFileSync(filePath, 'utf8');
+        let data = Repo.read();
         let notes = JSON.parse(data);
         const newID = Math.max.apply(
             Math,
@@ -55,12 +56,12 @@ class NoteService {
         };
         notes.push(newNote);
         data = JSON.stringify(notes);
-        fs.writeFileSync(filePath, data);
+        Repo.write(data);
         return newNote;
     }
 
     delete(id) {
-        let data = fs.readFileSync(filePath, 'utf8');
+        let data = Repo.read();
         let notes = JSON.parse(data);
         let index = -1;
         for (var i = 0; i < notes.length; i++) {
@@ -72,7 +73,7 @@ class NoteService {
         if (index > -1) {
             const note = notes.splice(index, 1);
             data = JSON.stringify(notes);
-            fs.writeFileSync(filePath, data);
+            Repo.write(data);
             return note;
         } else {
             throw new Error('указан не верный ID');
@@ -86,7 +87,7 @@ class NoteService {
         const noteContent = note.content;
         const noteDateslist = note.dateslist;
         const noteArchive = note.archived;
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = Repo.read();
         const notes = JSON.parse(content);
         let oldNote;
         for (var i = 0; i < notes.length; i++) {
@@ -105,13 +106,13 @@ class NoteService {
             oldNote.dateslist = noteDateslist;
             oldNote.archived = noteArchive;
             const data = JSON.stringify(notes);
-            fs.writeFileSync(filePath, data);
+            Repo.write(data);
         }
         return oldNote;
     }
 
     getStats() {
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = Repo.read();
         const notes = JSON.parse(content);
         const allCategories = new Set();
         const stats = [];
@@ -119,10 +120,10 @@ class NoteService {
             allCategories.add(note.category);
         }
         for (const category of allCategories) {
-            const archived = notes
+            const active = notes
                 .filter((note) => note.category === category)
                 .filter((note) => note.archived === false).length;
-            const active = notes
+            const archived = notes
                 .filter((note) => note.category === category)
                 .filter((note) => note.archived === true).length;
             const info = {
