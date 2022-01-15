@@ -4,6 +4,7 @@ import router from './routes/router.js';
 const PORT = 8888;
 const app = express();
 app.use(express.static('static'));
+app.use(express.json());
 app.use(router);
 
 function startApp() {

@@ -1,9 +1,5 @@
 import express from 'express';
 import Repo from '../repositories/Repo.js';
-// import fs from 'fs';
-
-const jsonParser = express.json();
-// const filePath = './repositories/notes.json';
 
 class NoteService {
     getAll() {
@@ -16,14 +12,16 @@ class NoteService {
         let note = null;
         const content = Repo.read();
         const notes = JSON.parse(content);
+        if (id > notes.length || id < 0) {
+            throw new Error('указан не верный ID');
+        }
         for (var i = 0; i < notes.length; i++) {
+            console.log(notes[i].id);
             if (notes[i].id == id) {
                 note = notes[i];
                 break;
             } else if (id.toString() === 'stats') {
                 note = this.getStats();
-            } else {
-                throw new Error('указан не верный ID');
             }
         }
 
